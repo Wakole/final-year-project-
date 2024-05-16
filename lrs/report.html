@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report Generator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <button id="generateReport">Generate Report</button>
+    <div id="titleSelection" style="display: none;">
+        <label for="titleSelect">Select a title:</label>
+        <select id="titleSelect"></select>
+        <button id="submitTitle">Submit</button>
+    </div>
+    <table id="reportTable">
+        <!-- Table data will be inserted here -->
+    </table>
+
+    <script>
+    $(document).ready(function() {
+        $('#generateReport').click(function() {
+            $.ajax({
+                url: 'get_titles.php',
+                type: 'post',
+                success: function(data) {
+                    $('#titleSelect').html(data);
+                    $('#titleSelection').show();
+                }
+            });
+        });
+
+        $('#submitTitle').click(function() {
+            var title = $('#titleSelect').val();
+            $.ajax({
+                url: 'get_report.php',
+                type: 'post',
+                data: {title: title},
+                success: function(data) {
+                    $('#reportTable').html(data);
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

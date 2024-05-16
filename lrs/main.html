@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lecture Reminder System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cool+Jazz&display=swap');
+
+        body {
+            font-family: 'Cool Jazz', cursive;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        #addReminder, #stopSound {
+            margin: 20px 0;
+            padding: 10px 20px;
+            font-size: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .reminder {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #stopSound {
+            display: none;
+        }
+        #header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: red;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 3em;
+            animation: blink 1s linear infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        #footer {
+            font-style: italic;
+            margin-top: auto;
+            text-align: center;
+        }
+        #welcomeScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(0, 0, 0);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOut 3s forwards;
+        }
+        #welcomeMessage {
+            border-right: 2px solid white;
+            font-style: italic;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 5s steps(30, end), blink 2s step-end infinite;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 9999;
+            animation: fadeOut 5s ease-in-out forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1><?php echo $_SESSION['username']; ?></h1>
+    <div id="overlay"></div>
+    <div id="welcomeMessage"></div>
+    <div id="header">
+        <h1>Lecture Reminder System</h1>
+    </div>
+    <input type="file" id="backgroundImageInput" accept="image/*">
+    <input type="file" id="soundInput" accept="audio/*" multiple>
+    <button id="addReminder">+</button>
+    <button id="stopSound">Stop Sound</button>
+    <div id="reminders"></div>
+    <div id="footer">
+        <p> © 2024 Lecture Reminder System</p>
+        <p> Crafted with ❤ By Wakole Wario</p>
+        <p> Supervised by: Mr. Cleophas Mochoge</p>
+    </div>
+    <a href="report.html">
+        <button>Your Report Generator</button>
+    </a>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var reminderCount = 0;
+        var audios = [];
+        var currentAudio = null;
+        var welcomeMessage = "Welcome to the Lecture Reminder System";
+        var i = 0;
+
+        function typeWriter() {
+            if (i < welcomeMessage.length) {
+                document.getElementById("welcomeMessage").innerHTML += welcomeMessage.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+
+        typeWriter();
+
+        document.getElementById('backgroundImageInput').addEventListener('change', function() {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.body.style.backgroundImage = 'url(' + e.target.result + ')';
+                document.getElementById('backgroundImageInput').style.display = 'none';
+            };
+            reader.readAsDataURL(this.files[0]);
+        });
+
+        document.getElementById('soundInput').addEventListener('change', function() {
+            if (this.files.length > 10) {
+                alert('Please select up to 10 audio files.');
+                return;
+            }
+
+            for (let i = 0; i < this.files.length; i++) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    audios.push(new Audio(e.target.result));
+                };
+                reader.readAsDataURL(this.files[i]);
+            }
+
+            document.getElementById('soundInput').style.display = 'none';
+        });
+
+        document.getElementById('addReminder').addEventListener('click', function() {
+            var reminder = document.createElement('div');
+            reminder.className = 'reminder';
+            reminder.innerHTML = `
+                <label for="title${reminderCount}">Title:</label>
+                <input type="text" id="title${reminderCount}">
+                <label for="time${reminderCount}">Time:</label>
+                <input type="time" id="time${reminderCount}">
+                <label for="date${reminderCount}">Date:</label>
+                <input type="date" id="date${reminderCount}">
+                <label for="ringtone${reminderCount}">Ringtone:</label>
+                <select id="ringtone${reminderCount}">
+                    ${audios.map((_, i) => '<option value="' + i + '">Ringtone ' + (i + 1) + '</option>').join('')}
+                </select>
+                <button onclick="setReminder(this, 'title${reminderCount}', 'time${reminderCount}', 'date${reminderCount}', 'ringtone${reminderCount}')">Set Reminder</button>
+                <button onclick="cancelReminder(this)">Cancel Reminder</button>
+            `;
+            document.getElementById('reminders').appendChild(reminder);
+            reminderCount++;
+        });
+
+        function setReminder(button, titleId, timeId, dateId, ringtoneId) {
+            var titleInput = document.getElementById(titleId);
+            var timeInput = document.getElementById(timeId);
+            var dateInput = document.getElementById(dateId);
+            var ringtoneSelect = document.getElementById(ringtoneId);
+            var audio = audios[ringtoneSelect.value];
+            var reminderTime = new Date(dateInput.value + ' ' + timeInput.value);
+            var now = new Date();
+            var timeUntilReminder = reminderTime.getTime() - now.getTime();
+
+            if (timeUntilReminder < 0) {
+                alert('Please enter a date and time in the future.');
+                return;
+            }
+
+            // AJAX call to set_reminder.php
+            $.ajax({
+                url: 'set_reminder.php',
+                type: 'post',
+                data: {
+                    title: titleInput.value,
+                    date: dateInput.value,
+                    time: timeInput.value
+                },
+                success: function(response) {
+                    alert(response);
+                }
+            });
+
+            var remainingMinutes = Math.ceil(timeUntilReminder / 60000);
+            var countdownStart = remainingMinutes <= 10 ? remainingMinutes : 10;
+            for (let i = countdownStart; i >= 1; i--) {
+                setTimeout(function() {
+                    currentAudio = audio;
+                    audio.play();
+                    alert('Your lecture "' + titleInput.value + '" starts in ' + i + ' minute(s).');
+                    
+                    document.getElementById('stopSound').style.display = 'block';
+                }, timeUntilReminder - i * 60000);  // i minutes before
+            }
+        }
+
+        document.getElementById('stopSound').addEventListener('click', function() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                this.style.display = 'none';
+            }
+        });
+
+        document.getElementById('welcomeMessage').addEventListener('animationend', function() {
+            this.remove();
+        });
+
+        document.getElementById('overlay').addEventListener('animationend', function() {
+            this.remove();
+        });
+    </script>
+</body>
+</html>

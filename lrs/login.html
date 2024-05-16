@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lecture Reminder System</title>
+</head>
+<body style="background-image: url('download.jpg'); font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-size: cover;">
+    <div id="login" class="form-container" style="border: 1px solid #c52a2a; padding: 20px; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8);">
+        <h2>LRS LOGIN</h2>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <button onclick="login('user', 'main.html')" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">User Login</button>
+        <button onclick="login('admin', 'admin.html')" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Admin Login</button>
+        <button onclick="showRegistration()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Register</button>
+    </div>
+
+    <div id="registration" class="form-container" style="display: none; border: 1px solid #ddd; padding: 20px; border-radius: 5px; background-color: rgba(255, 255, 255, 0.8);">
+        <h2>Registration</h2>
+        <label for="newUsername">Username:</label>
+        <input type="text" id="newUsername" name="newUsername" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <label for="newPassword">Password:</label>
+        <input type="password" id="newPassword" name="newPassword" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <button onclick="register('user', 'main.html')" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Register as User</button>
+        <button onclick="register('admin', 'admin.html')" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Register as Admin</button>
+    </div>
+
+    <script>
+        function showRegistration() {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('registration').style.display = 'block';
+        }
+
+        function register(role, redirectPage) {
+            var username = document.getElementById('newUsername').value;
+            var password = document.getElementById('newPassword').value;
+            var confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (username === '' || password === '') {
+                alert('Please enter a username and password.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                return;
+            }
+
+            // Send a POST request to register_user.php
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "register_user.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                    alert(this.responseText);
+                    showLogin();
+                }
+            }
+            xhr.send("username=" + username + "&password=" + password + "&confirmPassword=" + confirmPassword + "&role=" + role);
+        }
+
+        function showLogin() {
+            document.getElementById('login').style.display = 'block';
+            document.getElementById('registration').style.display = 'none';
+        }
+
+        function login(role, redirectPage) {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            if (username === '' || password === '') {
+                alert('Please enter your username and password.');
+                return;
+            }
+
+            // Send a POST request to login.php
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "login.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                    if (this.responseText === 'success') {
+                        window.location.href = redirectPage;
+                    } else {
+                        alert(this.responseText);
+                    }
+                }
+            }
+            xhr.send("username=" + username + "&password=" + password + "&role=" + role);
+        }
+    </script>
+</body>
+</html>

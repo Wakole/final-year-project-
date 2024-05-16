@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('image.jpg');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        form {
+            display: none; /* Hide all forms by default */
+        }
+        button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            transition-duration: 0.4s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        function showForm(formId) {
+            // Hide all forms
+            document.getElementById('addUserForm').style.display = 'none';
+            document.getElementById('manageUsersForm').style.display = 'none';
+            document.getElementById('viewAllUsersForm').style.display = 'none';
+
+            // Show the requested form
+            document.getElementById(formId).style.display = 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Page</h1>
+
+        <!-- Navigation Buttons -->
+        <button onclick="showForm('addUserForm')">Add User</button>
+        <button onclick="showForm('manageUsersForm')">Manage Users</button>
+        <button onclick="showForm('viewAllUsersForm')">View All Users</button>
+
+        <!-- Add User Form -->
+        <form id="addUserForm" action="add_user.php" method="post">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password"><br>
+            <input type="submit" value="Add User">
+        </form>
+
+        <!-- Manage Users Form -->
+        <form id="manageUsersForm" action="manage_users.php" method="post">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username"><br>
+            <input type="submit" name="action" value="Suspend User" formaction="suspend_user.php">
+            <input type="submit" name="action" value="Activate User" formaction="activate_user.php">
+            <input type="submit" name="action" value="Delete User" formaction="delete_user.php">
+        </form>
+
+        <!-- View All Users Form -->
+        <form id="viewAllUsersForm" action="view_all_users.php" method="get">
+            <input type="submit" value="View All Users">
+        </form>
+    </div>
+</body>
+</html>
